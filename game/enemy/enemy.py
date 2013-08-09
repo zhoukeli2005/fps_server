@@ -41,6 +41,7 @@ class enemy(object):
         self.__data.pos.z = z
         
     def update(self):
+        print "update", timer.gtimer.current()
         self.__statem.update()
         
     def move_to(self, x, z):
@@ -75,11 +76,14 @@ class state_run(state_manager.istate):
     def re_enter(self, param):
         self.enter(param)
     
-    def update(self, param):
-        delta_time = timer.gtimer.current() - self.__last_time
-        self.__last_time = timer.gtimer.current()
+    def update(self):
+        now = timer.gtimer.current()
+        delta_time = now - self.__last_time
+        self.__last_time = now
         
-        distance = delta_time * self.__data.walk_velocity
+        print now, delta_time
+        
+        distance = delta_time * self.__data.walk_velocity * 0.001
         print "distance", distance, delta_time
         
         next_pos = self.__path[self.__pos]
