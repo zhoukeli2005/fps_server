@@ -58,8 +58,8 @@ class connection(asyncore.dispatcher):
     def send_packet(self, pkt):
         d = (pkt.pack(), self.__send_list)
         self.__send_list = d
-        
-    def writeable(self):
+                
+    def writable(self):
         return self.__send_list is not None
     
     def handle_read(self):
@@ -95,7 +95,6 @@ class connection(asyncore.dispatcher):
         d[0] = data
     
     def handle_close(self):
-        print "handle_close"
         self.close()
         if _callback:
             _callback.do_conn_close(self)
