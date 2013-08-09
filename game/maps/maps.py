@@ -6,6 +6,7 @@
 #======================================================================
 
 import struct
+import util
 
 MinX = 0
 MaxX = 0
@@ -85,6 +86,37 @@ def find_nearest_walkable(x, z):
             direction = (direction + 1) % 4
             
     return x, z
+
+def can_direct_reach(from_x, from_z, to_x, to_z):
+    from_x, to_x = from_x - MinX, to_x - MinX
+    from_z, to_z = from_z - MinZ, to_z - MinZ
+    
+    if from_x > to_x:
+        from_x, from_z, to_x, to_z = to_x, to_z, from_x, from_z
+        
+    if to_x > from_x:
+        x = int(from_x)
+        d = (to_z - from_z) / (to_x - from_x)
+        while x <= to_x:
+            z = from_z + (x - from_x) * d
+            if not is_walkable(x + MinX, z + MinZ):
+                return False
+            x += 1
+                
+    if to_z != from_z:
+        z = int(from_z)
+        sgn = util.sgn(to_z - from_z)
+        d = (to_x - from_x) / (to_z - from_z)
+        while util.sgn(to_z - z) == sgn:
+            x = from_x + (z - from_z) * d
+            if not is_walkable(x + MinX, z + MinZ):
+                return False
+            z += sgn
+            
+    return True
+     
+    
+    
             
             
 # ==================== private =================

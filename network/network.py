@@ -15,8 +15,8 @@ def init(cb):
     global _callback
     _callback = cb
 
-def loop(seconds):
-    asyncore.loop(seconds, True)
+def loop(s):
+    asyncore.loop(s, True, None, 1)
 
 class net_callback(object):
     def do_conn_comes(self, conn):
@@ -28,14 +28,14 @@ class net_callback(object):
     def do_packet(self, conn, pkt):
         raise Exception("must implement")
 
-class listener(asyncore.dispatcher, object):
+class listener(asyncore.dispatcher):
     
     def __init__(self, port):
-        super(listener, self).__init__();
+        asyncore.dispatcher.__init__(self);
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
-        self.bind(("0.0.0.0", port))
-        self.listen(32)
+        self.bind(('', port))
+        self.listen(5)
         
     def handle_accept(self):
         print "accept new connection"
@@ -48,10 +48,10 @@ class listener(asyncore.dispatcher, object):
         if _callback:
             _callback.do_conn_comes(conn)
 
-class connection(asyncore.dispatcher, object):
+class connection(asyncore.dispatcher):
     def __init__(self, pair):
         self.__sock, self.__addr = pair
-        super(connection, self).__init__(self.__sock);
+        asyncore.dispatcher.__init__(self, self.__sock);
         self.__send_list = None
         self.__read_buffer = ""
         

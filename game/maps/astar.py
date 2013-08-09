@@ -127,6 +127,7 @@ def path_find(_from_x, _from_z, _to_x, _to_z):
             return build_path(s)
         push_neighbor(s)
         
+    print "Cannot Find Path!"
     return None
 
 def build_path(s):
@@ -138,9 +139,23 @@ def build_path(s):
         
     path.reverse()
     
-    return path
+    out = []
+    out.append(path[0])
+    
+    i = 0
+    j = len(path) - 1
+    while i < len(path) - 1:
+        if j == i + 1 or maps.can_direct_reach(path[i][0], path[i][1], path[j][0], path[j][1]):
+            out.append(path[j])
+            i = j
+            j = len(path) - 1
+            continue
+        j -= 1
+    
+    
+    return out
     
 if __name__ == "__main__":
     maps.load("..\\..\\maps")
-    print path_find(-2, 0, -7, 2)
+    print path_find(-2, 0, -8, 2)
         

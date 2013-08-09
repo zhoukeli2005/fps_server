@@ -12,3 +12,6 @@ class player(object):
         
     def get_conn(self):
         return self.__conn
+    
+    def update(self):
+        pass

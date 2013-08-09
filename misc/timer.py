@@ -15,7 +15,7 @@ class timer(object):
     def current(self):
         now = datetime.datetime.now()
         time_delta = now - self.__start_time
-        result = time_delta.days * 3600 * 24 * 1000 + time_delta.seconds * 1000 + time_delta.microseconds / 1000;
+        result = time_delta.days * 24 * 3600 + time_delta.seconds + time_delta.microseconds * 0.000001;
         return result
     
 gtimer = timer()

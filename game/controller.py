@@ -46,10 +46,10 @@ class controller(network.net_callback):
         
     # ============== game logic =============================
     def update(self):
-        for enemy in self.Enemies:
+        for enemy in self.Enemies.values():
             enemy.update()
             
-        for ply in self.Players:
+        for ply in self.Players.values():
             ply.update()
             
     def broadcast(self, pkt):

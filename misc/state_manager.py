@@ -5,7 +5,7 @@
 #
 #======================================================================
 
-import util.timer
+import misc.timer
 
 #
 #    1. _enter_time 
@@ -56,7 +56,7 @@ class istate_manager(object):
         self.__curr_state = s
         self.__curr_state_name = name
         
-        self.__curr_state._enter_time = util.timer.gtimer.current()
+        self.__curr_state._enter_time = misc.timer.gtimer.current()
         self.__curr_state.enter(param)
         
     def get_curr_state(self):

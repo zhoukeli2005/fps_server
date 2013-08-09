@@ -22,7 +22,7 @@ def main():
     # loop
     while True:
         net.loop(0.1)
-    
+            
         # do logical update
         game_controller.update()
       
