@@ -138,6 +138,8 @@ def build_path(s):
         path.append(get_pos(s[0]))
         s = s[1]
         
+    print "[build path] A"
+        
     path.reverse()
     
     out = []
@@ -146,13 +148,14 @@ def build_path(s):
     i = 0
     j = len(path) - 1
     while i < len(path) - 1:
-        if j == i + 1 or maps.can_direct_reach(path[i][0], path[i][1], path[j][0], path[j][1]):
+        
+        if j <= (i + 1) or maps.can_direct_reach(path[i][0], path[i][1], path[j][0], path[j][1]):
+            j = max(j, i + 1)
             out.append(path[j])
             i = j
             j = len(path) - 1
             continue
         j -= 1
-    
     
     return out
     

@@ -7,6 +7,10 @@
 
 class data(object):
     
+    def __init__(self, **kw):
+        for k, v in kw.items():
+            self.__setattr__(k, v)
+    
     def __setattr__(self, k, v):
         self.__dict__[k] = v
         

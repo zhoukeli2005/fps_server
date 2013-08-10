@@ -91,7 +91,6 @@ class connection(asyncore.dispatcher):
         data = d[0]
         size = self.send(data)
         if size >= len(data):
-            print "[NET] write a packet!"
             self.__send_list = d[1]
             return self.handle_write()
         data = data[size:]

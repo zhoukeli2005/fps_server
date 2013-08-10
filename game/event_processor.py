@@ -41,7 +41,7 @@ class eventp_login(ieventp):
         
 class eventp_position(ieventp):
     def run(self, conn, pkt):
-        print "event position", pkt
+        print "[event] position", pkt
         import game.controller
         gcontroller = game.controller.gcontroller
         for enemy in gcontroller.Enemies.values():

@@ -89,18 +89,19 @@ class state_run(state_manager.istate):
         self.__data = d
         
     def enter(self, param):
-        print "enemy", "start run"
+        print "[enemy]", "start run"
         self.__target_x, self.__target_z = param
         self.__path = astar.path_find(self.__data.pos.x, self.__data.pos.z, self.__target_x, self.__target_z)
         self.__pos = 1
-        self.__last_time = timer.gtimer.current()
-        
+                
         if not self.__path:
-            print "enemy:", "not find path"
+            print "[enemy]", "not find path"
             self._statem.change_to(STATE_IDLE, None)
             return
         
-        print "enemy:", "find path, len:", len(self.__path)
+        print "[enemy]", "find path, len:", len(self.__path)
+        
+        self.icalc_next()
         
         # broadcast enemy run
         self.ibroadcast_run()
@@ -111,40 +112,46 @@ class state_run(state_manager.istate):
     def update(self):
         now = timer.gtimer.current()
         delta_time = now - self.__last_time
-        self.__last_time = now
-        
+
         distance = delta_time * self.__data.walk_velocity * 0.001
         
-        next_pos = self.__path[self.__pos]
-        delta_x = next_pos[0] - self.__data.pos.x
-        delta_z = next_pos[1] - self.__data.pos.z
-        
-        L = delta_x * delta_x + delta_z * delta_z
-        if distance * distance >= L:    # reached waypoint
-            self.__data.pos.x = next_pos[0]
-            self.__data.pos.z = next_pos[1]
+        if distance >= self.__L:    # reached waypoint
+            self.__data.pos.x = self.__next_waypoint.x
+            self.__data.pos.z = self.__next_waypoint.z
             
             self.__pos += 1
             if self.__pos >= len(self.__path):
                 self._statem.change_to(STATE_IDLE, None)
                 return
             
+            self.icalc_next()
+            
             # broadcast enemy run
             self.ibroadcast_run()
             return
+              
+        self.__data.pos.x = self.__last_waypoint.x + distance * self.__dir.x
+        self.__data.pos.z = self.__last_waypoint.z + distance * self.__dir.z
         
+        self.ibroadcast_run()
+        
+    def icalc_next(self):
+        self.__last_time = timer.gtimer.current()
+        
+        curr_waypoint = self.__path[self.__pos - 1]
+        next_waypoint = self.__path[self.__pos]
+        
+        delta_x = next_waypoint[0] - curr_waypoint[0]
+        delta_z = next_waypoint[1] - curr_waypoint[1]
+        
+        L = delta_x ** 2 + delta_z ** 2
         L = math.sqrt(L)
-        distance = math.sqrt(distance)
-        delta_x /= L
-        delta_z /= L
         
-        delta_x *= distance
-        delta_z *= distance
+        self.__dir = data.data(x = delta_x / L, z = delta_z / L)
+        self.__last_waypoint = data.data(x = curr_waypoint[0], z = curr_waypoint[1])
+        self.__next_waypoint = data.data(x = next_waypoint[0], z = next_waypoint[1])
+        self.__L = L
         
-        self.__data.pos.x += delta_x
-        self.__data.pos.z += delta_z
-        
-        print "enemy pos:", self.__data.pos
         
     def ibroadcast_run(self):        
         pkt = network.packet.packet(network.events.MSG_SC_ENEMY_RUN)
