@@ -80,7 +80,7 @@ class state_idle(state_manager.istate):
     def update(self):
         now = timer.gtimer.current()
         delta = now - self.__enter_time
-        if delta > 1:
+        if delta > 1000:
             pass
                 
 #================== Run ==========================
@@ -89,14 +89,18 @@ class state_run(state_manager.istate):
         self.__data = d
         
     def enter(self, param):
+        print "enemy", "start run"
         self.__target_x, self.__target_z = param
         self.__path = astar.path_find(self.__data.pos.x, self.__data.pos.z, self.__target_x, self.__target_z)
         self.__pos = 1
         self.__last_time = timer.gtimer.current()
         
         if not self.__path:
+            print "enemy:", "not find path"
             self._statem.change_to(STATE_IDLE, None)
             return
+        
+        print "enemy:", "find path, len:", len(self.__path)
         
         # broadcast enemy run
         self.ibroadcast_run()
@@ -116,13 +120,14 @@ class state_run(state_manager.istate):
         delta_z = next_pos[1] - self.__data.pos.z
         
         L = delta_x * delta_x + delta_z * delta_z
-        if distance * distance >= L:    # reached next waypoint
+        if distance * distance >= L:    # reached waypoint
             self.__data.pos.x = next_pos[0]
             self.__data.pos.z = next_pos[1]
             
             self.__pos += 1
             if self.__pos >= len(self.__path):
                 self._statem.change_to(STATE_IDLE, None)
+                return
             
             # broadcast enemy run
             self.ibroadcast_run()
@@ -139,7 +144,7 @@ class state_run(state_manager.istate):
         self.__data.pos.x += delta_x
         self.__data.pos.z += delta_z
         
-        print "pos:", self.__data.pos
+        print "enemy pos:", self.__data.pos
         
     def ibroadcast_run(self):        
         pkt = network.packet.packet(network.events.MSG_SC_ENEMY_RUN)
