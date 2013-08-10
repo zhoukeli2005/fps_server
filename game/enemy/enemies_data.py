@@ -11,14 +11,14 @@ Data = {
         "e1" : {
                 "name" : "e1",
                 "hp" : 1000,
-                "walk_velocity" : 2,
+                "walk_velocity" : 3,
                 "level" : 1,
                 "exp" : 5
         },
         "e2" : {
                 "name" : "e2",
                 "hp" : 100,
-                "walk_velocity" : 1.5,
+                "walk_velocity" : 3.1,
                 "level" : 1,
                 "exp" : 3
         }

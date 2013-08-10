@@ -10,5 +10,6 @@ encoding//misc/state_manager.py=utf-8
 encoding//misc/timer.py=utf-8
 encoding//network/network.py=utf-8
 encoding//network/packet.py=utf-8
+encoding/<project>=UTF-16
 encoding/data.py=utf-8
 encoding/server.py=utf-8

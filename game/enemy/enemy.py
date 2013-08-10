@@ -53,6 +53,8 @@ class enemy(object):
         self.__statem.update()
         
     def move_to(self, x, z):
+        import game.maps
+        x, z = game.maps.maps.find_nearest_walkable(x, z)        
         self.__statem.change_to(STATE_RUN, (x, z))
         
     def get_born_pkt(self):
