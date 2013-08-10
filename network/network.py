@@ -64,11 +64,13 @@ class connection(asyncore.dispatcher):
     
     def handle_read(self):
         data = self.recv(8192)
-        if len(data) == 0:
-            return
-        
-        self.__read_buffer += data
-        
+        while len(data) > 0:
+            self.__read_buffer += data
+            try:
+                data = self.recv(8192)
+            except :
+                data = ''
+            
         # parse & callback
         buf = self.__read_buffer
         size, flag = packet.parse_head(buf)
@@ -80,7 +82,7 @@ class connection(asyncore.dispatcher):
             if _callback:
                 _callback.do_packet(self, pkt)
                 
-        self.__read_buffer = buf        
+        self.__read_buffer = buf
         
     def handle_write(self):
         d = self.__send_list
@@ -89,6 +91,7 @@ class connection(asyncore.dispatcher):
         data = d[0]
         size = self.send(data)
         if size >= len(data):
+            print "[NET] write a packet!"
             self.__send_list = d[1]
             return self.handle_write()
         data = data[size:]

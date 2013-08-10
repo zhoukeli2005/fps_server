@@ -98,6 +98,7 @@ def push_neighbor(s):
                
 def path_find(_from_x, _from_z, _to_x, _to_z):
     if not maps.is_walkable(_from_x, _from_z) or not maps.is_walkable(_to_x, _to_z):
+        print "Cannot find path"
         return None
     
     global ToX, ToZ, OpenList, OpenIds, CloseIds
@@ -121,7 +122,7 @@ def path_find(_from_x, _from_z, _to_x, _to_z):
         loop += 1
         s = pop_from_open_list()
         if not s:
-            return None
+            break
         if s[0] == ToID:
             print "Find Path!", loop
             return build_path(s)

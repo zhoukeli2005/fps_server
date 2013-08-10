@@ -13,6 +13,9 @@ class data(object):
     def __setitem__(self, k, v):
         self.__setattr__(k, v)
         
+    def __getitem__(self, k):
+        return self.__getattribute__(k)
+        
     def __str__(self):
         out = ""
         for k, v in self.__dict__.items():

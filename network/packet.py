@@ -20,10 +20,10 @@ def parse_head(raw):
         return 0, 0
     return struct.unpack(HEAD_FORMAT, raw[:HEAD_SIZE])
 
-def register(flag, format):
+def register(flag, _format):
     data = []
-    for i in range(len(format)):
-        fmt = format[i]
+    for i in range(len(_format)):
+        fmt = _format[i]
         idx = fmt.index(":")
         d = (fmt[0:idx], fmt[idx + 1:].strip())
         data.append(d)
@@ -48,7 +48,6 @@ class packet(object):
     def pack(self):
         curr_format = HEAD_FORMAT
         curr_value = [0, self.__flag]
-        total_len = 0
         for i in range(len(self.__format)):
             key, fmt = self.__format[i]
             value = self.__getattribute__(key)
@@ -88,6 +87,14 @@ class packet(object):
         for i in range(len(self.__format)):
             key, fmt = self.__format[i]
             self.__setattr__(key, curr_value[i])
+            
+    def __str__(self):
+        out = ""
+        for k, v in self.__dict__.items():
+            if k[:2] != "__":
+                out += k.__str__() + ":" + v.__str__() + ", "
+                
+        return out
                     
 
 if __name__ == '__main__':

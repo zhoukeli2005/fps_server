@@ -9,14 +9,14 @@ import data
 
 Data = {
         "e1" : {
-                "name" : "骷髅战士",
+                "name" : "e1",
                 "hp" : 1000,
                 "walk_velocity" : 50,
                 "level" : 1,
                 "exp" : 5
         },
         "e2" : {
-                "name" : "机械杀手",
+                "name" : "e2",
                 "hp" : 100,
                 "walk_velocity" : 100,
                 "level" : 1,

@@ -7,9 +7,9 @@
 
 import network.network as network
 import player
-import enemy.enemy
 import network.events as events
 import maps.maps as maps
+import event_processor
 
 class controller(network.net_callback):
     def __init__(self):
@@ -17,11 +17,14 @@ class controller(network.net_callback):
         network.init(self)
         self.Players = {}
         self.Enemies = {}
+        self.__eventp = {}
         
         maps.load(".\\maps")
         
-        # create an enemy
-        self.Enemies[1] = enemy.enemy.enemy("e1", -2, 0)
+        # register event processor
+        self.__eventp[events.MSG_CS_LOGIN] = event_processor.eventp_login()
+        self.__eventp[events.MSG_CS_POSITION] = event_processor.eventp_position()
+        
     
     # ============= connection & packet ========================
     def do_conn_comes(self, conn):
@@ -31,21 +34,20 @@ class controller(network.net_callback):
         pass
     
     def do_packet(self, conn, pkt):
-        print pkt.__dict__
-        if pkt.flag == events.MSG_CS_LOGIN:
-            print "login", pkt.name
-            ply = player.player(pkt, conn)
-            self.Players[pkt.name] = ply
-            return
-        
-        if pkt.flag == events.MSG_CS_POSITION:
-            print "position", pkt.x, pkt.z
-            for enemy in self.Enemies.values():
-                enemy.move_to(pkt.x, pkt.z)
-            return
+        if not pkt.flag in self.__eventp:
+            raise Exception("No Event Processor For %d" % pkt.flag)
+        ep = self.__eventp[pkt.flag]
+        ep.run(conn, pkt)
         
     # ============== game logic =============================
     def update(self):
+        
+        if len(self.Enemies) < 1:
+            # test : create an enemy
+            
+            import enemy.enemy as enemy
+            self.Enemies[1] = enemy.enemy("e1", -2, 0)
+        
         for enemy in self.Enemies.values():
             enemy.update()
             
@@ -53,9 +55,8 @@ class controller(network.net_callback):
             ply.update()
             
     def broadcast(self, pkt):
-        for ply in self.Players:
-            conn = ply.get_conn()
-            conn.send_packet(pkt)
+        for ply in self.Players.values():
+            ply.send_packet(pkt)
     
         
         
