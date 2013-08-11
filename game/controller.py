@@ -6,10 +6,8 @@
 #======================================================================
 
 import network.network as network
-import player
 import network.events as events
 import maps.maps as maps
-import event_processor
 
 class controller(network.net_callback):
     def __init__(self):
@@ -22,16 +20,20 @@ class controller(network.net_callback):
         maps.load(".\\maps")
         
         # register event processor
-        self.__eventp[events.MSG_CS_LOGIN] = event_processor.eventp_login()
-        self.__eventp[events.MSG_CS_POSITION] = event_processor.eventp_position()
+        import game.event_processor.event_loginout as event_loginout
+        import game.event_processor.event_player as event_player
+        self.__eventp[events.MSG_CS_LOGIN] = event_loginout.eventp_login()
+        self.__eventp[events.MSG_CS_LOGOUT] = event_loginout.eventp_logout()
         
+        self.__eventp[events.MSG_CS_POSITION] = event_player.eventp_position()
     
     # ============= connection & packet ========================
     def do_conn_comes(self, conn):
         pass
    
     def do_conn_close(self, conn):
-        pass
+        ep = self.__eventp[events.MSG_CS_LOGOUT]
+        ep.run(conn, None)
     
     def do_packet(self, conn, pkt):
         if not pkt.flag in self.__eventp:
@@ -44,9 +46,7 @@ class controller(network.net_callback):
         
         if len(self.Enemies) < 1:
             # test : create an enemy
-            
-            import enemy.enemy as enemy
-            self.Enemies[1] = enemy.enemy("e1", -2, 0)
+            self.born_enemy("e1", -2, 0)
         
         for enemy in self.Enemies.values():
             enemy.update()
@@ -56,7 +56,13 @@ class controller(network.net_callback):
             
     def broadcast(self, pkt):
         for ply in self.Players.values():
-            ply.send_packet(pkt)
+            if ply.is_ok():
+                ply.send_packet(pkt)
+            
+    def born_enemy(self, name, x, z):
+        import game.enemy.enemy as enemy
+        e = enemy.enemy(name, x, z)
+        self.Enemies[e.id] = e
     
         
         

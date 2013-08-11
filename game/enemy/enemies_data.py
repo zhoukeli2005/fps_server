@@ -26,6 +26,7 @@ Data = {
 
 def get_data(name):
     if not name in Data:
+        print "no enemy:", name
         return None
     
     d = Data[name]

@@ -5,19 +5,17 @@
 #
 #======================================================================
 
-import data
-
 users = {
          "netease001" : "163",
          "netease002" : "163",
          "netease003" : "163"
 }
 
-class ieventp(object):
-    def run(self, conn, pkt):
-        raise Exception("must be implemented!")
-    
-class eventp_login(ieventp):
+import ieventp
+import data
+
+# ============== Event Login =====================
+class eventp_login(ieventp.ieventp):
     def run(self, conn, pkt):
         name = pkt.name
         password = pkt.password
@@ -49,33 +47,63 @@ class eventp_login(ieventp):
                
         # build data
         d = data.data()
-        d.name = name 
-                  
+        d.name = name                  
                 
         import game.player as player
         ply = player.player(d, conn)
-        conn.ply = ply        
         
         # save in gcontroller.Players
         gcontroller.Players[name] = ply
         
-        # send enemy info
-        for enemy in gcontroller.Enemies.values():
-            pkt = enemy.get_born_pkt()
-            ply.send_packet(pkt)
-            
         # send back success
         pkt_back.status = 1
         conn.send_packet(pkt_back)
         
-        # broadcast to other players
         
-        # send other ply info
+#================== Event Logout ====================
+class eventp_logout(ieventp.ieventp):
+    def run(self, conn, _):
+        import game.player as player
+        ply = player.get_ply(conn)
+        if not ply:
+            return
         
-class eventp_position(ieventp):
-    def run(self, conn, pkt):
-        print "[event] position", pkt
+        print "logout", ply.name
+        
+        # 1. remove from gcontroller
         import game.controller
         gcontroller = game.controller.gcontroller
+        if ply.name in gcontroller.Players:
+            del gcontroller.Players[ply.name]
+            
+        # 2. broadcast to everyone
+        import network
+        pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGOUT, name = ply.name)
+        gcontroller.broadcast(pkt)
+            
+        
+#================= Event I Am OK ============================
+class eventp_iamok(ieventp.ieventp):
+    def run(self, conn, pkt):
+        import game.player
+        
+        ply = game.player.get_ply(conn)
+        if not ply:
+            return;
+        
+        import game.controller
+        gcontroller = game.controller.gcontroller
+        
+        # 1. send enemy info
         for enemy in gcontroller.Enemies.values():
-            enemy.move_to(pkt.x, pkt.z)
+            pkt = enemy.get_born_pkt()
+            ply.send_packet(pkt)
+            
+        # 2. broadcast to everyone
+        import network
+        x, z = pkt.x, pkt.z
+        pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = x, z = z, hero = ply.hero)
+        gcontroller.broadcast(pkt)
+        
+        # 3. sent other players info
+        

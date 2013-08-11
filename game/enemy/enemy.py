@@ -62,7 +62,16 @@ class enemy(object):
                                     id = self.id, 
                                     name = self.__data.name, 
                                     x = self.__data.pos.x, 
-                                    z = self.__data.pos.z)
+                                    z = self.__data.pos.z,
+                                    next_x = self.__data.pos.x,
+                                    next_z = self.__data.pos.z,
+                                    velocity = 0)
+        
+        if self.__statem.get_curr_state_name() == STATE_RUN:
+            run_pkt = self.__statem.get_curr_state().get_run_pkt()
+            pkt.next_x = run_pkt.next_x
+            pkt.next_z = run_pkt.next_z
+            pkt.velocity = run_pkt.velocity
         return pkt
         
     
@@ -155,7 +164,11 @@ class state_run(state_manager.istate):
         self.__L = L
         
         
-    def ibroadcast_run(self):        
+    def ibroadcast_run(self):
+        pkt = self.get_run_pkt()
+        game.controller.gcontroller.broadcast(pkt)
+        
+    def get_run_pkt(self):
         pkt = network.packet.packet(network.events.MSG_SC_ENEMY_RUN)
         pkt.id = self.__data.id
         pkt.x = self.__data.pos.x
@@ -167,8 +180,7 @@ class state_run(state_manager.istate):
         else:
             pkt.next_x = self.__path[self.__pos][0]
             pkt.next_z = self.__path[self.__pos][1]
-            
-        game.controller.gcontroller.broadcast(pkt)
+        return pkt
 
 #===================== Attack ========================
 class state_attack(state_manager.istate):
