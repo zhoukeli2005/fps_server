@@ -22,5 +22,14 @@ class eventp_run(ieventp.ieventp):
         import game.player
         ply = game.player.get_ply(conn)
         if not ply:
+            print "[warning] event player run, no such player:", ply.name
             return
         
+        ply.pos.x = pkt.x
+        ply.pos.z = pkt.z
+        
+        
+        
+class eventp_stop(ieventp.ieventp):
+    def run(self, conn, pkt):
+        pass

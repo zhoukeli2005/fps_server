@@ -5,6 +5,7 @@
 #
 #======================================================================
 import constants
+import data
 
 def get_ply(conn):
     if hasattr(conn, "ply"):
@@ -18,6 +19,7 @@ class player(object):
         self.__state = constants.PLAYER_STATE_LOGIN
         conn.ply = self 
         self.hero = "hero"
+        self.pos = data.data(x = 1000, z = 1000)
             
     def send_packet(self, pkt):
         if self.__conn:

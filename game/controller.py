@@ -54,9 +54,9 @@ class controller(network.net_callback):
         for ply in self.Players.values():
             ply.update()
             
-    def broadcast(self, pkt):
+    def broadcast(self, pkt, without_ply_name = None):
         for ply in self.Players.values():
-            if ply.is_ok():
+            if ply.is_ok() and ply.name != without_ply_name:
                 ply.send_packet(pkt)
             
     def born_enemy(self, name, x, z):

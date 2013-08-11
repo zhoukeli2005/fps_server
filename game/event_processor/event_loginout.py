@@ -99,11 +99,14 @@ class eventp_iamok(ieventp.ieventp):
             pkt = enemy.get_born_pkt()
             ply.send_packet(pkt)
             
-        # 2. broadcast to everyone
+        # 2. broadcast to everyone without this ply
         import network
         x, z = pkt.x, pkt.z
         pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = x, z = z, hero = ply.hero)
-        gcontroller.broadcast(pkt)
+        gcontroller.broadcast(pkt, withou_player_name = ply.name)
         
         # 3. sent other players info
+        for other_ply in gcontroller.Players.values():
+            pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = other_ply.name, hero = other_ply.hero, x = 10000, z = 10000)
+            ply.send_packet(pkt)
         
