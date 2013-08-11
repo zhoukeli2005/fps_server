@@ -10,7 +10,6 @@ import ieventp
 #================= Event Position ============================
 class eventp_position(ieventp.ieventp):
     def run(self, conn, pkt):
-        print "[event] position", pkt
         import game.controller
         gcontroller = game.controller.gcontroller
         for enemy in gcontroller.Enemies.values():
@@ -33,7 +32,7 @@ class eventp_run(ieventp.ieventp):
                                      name = ply.name, x = pkt.x, z = pkt.z, dir_x = pkt.dir_x, dir_z = pkt.dir_z,
                                      velocity = pkt.velocity)
         import game.controller
-        game.controller.gcontroller.broadcast(bpkt, ply.name)
+        game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
         
 #=================== Event Stop =======================================        
 class eventp_stop(ieventp.ieventp):
@@ -50,5 +49,5 @@ class eventp_stop(ieventp.ieventp):
         import network
         bpkt = network.packet.packet(network.events.MSG_SC_OTHER_STOP, name = ply.name, x = pkt.x, z = pkt.z)
         import game.controller
-        game.controller.gcontroller.broadcast(bpkt, ply.name)
+        game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
         

@@ -58,14 +58,10 @@ class controller(network.net_callback):
             ply.update()
             
     def broadcast(self, pkt, without_player_name = None):
-        print "broadcast", self.Players
         for ply in self.Players.values():
             if ply.is_ok() and ply.name != without_player_name:
-                print "broadcast to:", ply.name
                 ply.send_packet(pkt)
-            else:
-                print "dont send to:", ply.name, ply.get_state()
-            
+                
     def born_enemy(self, name, x, z):
         import game.enemy.enemy as enemy
         e = enemy.enemy(name, x, z)

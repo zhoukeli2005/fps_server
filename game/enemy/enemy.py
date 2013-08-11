@@ -81,7 +81,6 @@ class state_idle(state_manager.istate):
         self.__data = d
         
     def enter(self, param):
-        print "enemy stop"
         self.__enter_time = timer.gtimer.current()
         
         # broadcast enemy stop
@@ -100,7 +99,6 @@ class state_run(state_manager.istate):
         self.__data = d
         
     def enter(self, param):
-        print "[enemy]", "start run"
         self.__target_x, self.__target_z = param
         self.__path = astar.path_find(self.__data.pos.x, self.__data.pos.z, self.__target_x, self.__target_z)
         self.__pos = 1
@@ -109,9 +107,7 @@ class state_run(state_manager.istate):
             print "[enemy]", "not find path"
             self._statem.change_to(STATE_IDLE, None)
             return
-        
-        print "[enemy]", "find path, len:", len(self.__path)
-        
+                
         self.icalc_next()
         
         # broadcast enemy run
@@ -143,8 +139,6 @@ class state_run(state_manager.istate):
               
         self.__data.pos.x = self.__last_waypoint.x + distance * self.__dir.x
         self.__data.pos.z = self.__last_waypoint.z + distance * self.__dir.z
-        
-        self.ibroadcast_run()
         
     def icalc_next(self):
         self.__last_time = timer.gtimer.current()

@@ -124,7 +124,6 @@ def path_find(_from_x, _from_z, _to_x, _to_z):
         if not s:
             break
         if s[0] == ToID:
-            print "Find Path!", loop
             return build_path(s)
         push_neighbor(s)
         
@@ -137,9 +136,7 @@ def build_path(s):
     while s != None:
         path.append(get_pos(s[0]))
         s = s[1]
-        
-    print "[build path] A"
-        
+                
     path.reverse()
     
     out = []

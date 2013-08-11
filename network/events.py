@@ -34,7 +34,7 @@ packet.register( MSG_SC_ENEMY_BORN,     ( "id:I", "name:s", "x:d", "z:d", "next_
 packet.register( MSG_SC_ENEMY_STOP,     ( "id:I", "x:d", "z:d" ) )
 packet.register( MSG_SC_ENEMY_RUN,      ( "id:I", "x:d", "z:d", "next_x:d", "next_z:d", "velocity:d" ) )
 
-packet.register( MSG_SC_OTHER_LOGIN,    ( "name:s", "x:d", "z:d", "hero:s", "dir_x:d", "dir_z:d", "velocity:d") )
+packet.register( MSG_SC_OTHER_LOGIN,    ( "name:s", "x:d", "z:d", "hero:s") )
 packet.register( MSG_SC_OTHER_LOGOUT,   ( "name:s", ) )
 packet.register( MSG_SC_OTHER_RUN,      ( "name:s", "x:d", "z:d", "dir_x:d", "dir_z:d", "velocity:d" ) )
-packet.register( MSG_SC_OTHER_STOP,     ( "name:s", ) )
+packet.register( MSG_SC_OTHER_STOP,     ( "name:s", "x:d", "z:d") )
