@@ -25,8 +25,8 @@ MSG_SC_OTHER_STOP   = 0x2008
 packet.register( MSG_CS_LOGIN,          ( "name:s", "password:s" ) )
 packet.register( MSG_CS_POSITION,       ( "x:d", "z:d" ) )
 packet.register( MSG_CS_I_AM_OK,        ( "x:d", "z:d" ) )
-packet.register( MSG_CS_PLAYER_RUN,     ( "x:d", "z:d", "dir_x:d", "dir_z:d", "velocity:d"))
-packet.register( MSG_CS_PLAYER_STOP,    ( "x:d", "z:d", "dir_x:d", "dir_z:d") )
+packet.register( MSG_CS_PLAYER_RUN,     ( "x:d", "z:d", "dir_x:d", "dir_z:d", "velocity:d" ) )
+packet.register( MSG_CS_PLAYER_STOP,    ( "x:d", "z:d" ) )
 
 # =========== Server To Client ===================================
 packet.register( MSG_SC_LOGIN,          ( "status:i", "err:s" ) )

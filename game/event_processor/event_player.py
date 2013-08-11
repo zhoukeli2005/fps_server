@@ -28,8 +28,27 @@ class eventp_run(ieventp.ieventp):
         ply.pos.x = pkt.x
         ply.pos.z = pkt.z
         
+        import network
+        bpkt = network.packet.packet(network.events.MSG_SC_OTHER_RUN, 
+                                     name = ply.name, x = pkt.x, z = pkt.z, dir_x = pkt.dir_x, dir_z = pkt.dir_z,
+                                     velocity = pkt.velocity)
+        import game.controller
+        game.controller.gcontroller.broadcast(bpkt, ply.name)
         
-        
+#=================== Event Stop =======================================        
 class eventp_stop(ieventp.ieventp):
     def run(self, conn, pkt):
-        pass
+        import game.player
+        ply = game.player.get_ply(conn)
+        if not ply:
+            print "[warning] event player stop, no such player:", ply.name
+            return
+        
+        ply.pos.x = pkt.x
+        ply.pos.z = pkt.z
+        
+        import network
+        bpkt = network.packet.packet(network.events.MSG_SC_OTHER_STOP, name = ply.name, x = pkt.x, z = pkt.z)
+        import game.controller
+        game.controller.gcontroller.broadcast(bpkt, ply.name)
+        

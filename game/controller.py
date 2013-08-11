@@ -23,9 +23,12 @@ class controller(network.net_callback):
         import game.event_processor.event_loginout as event_loginout
         import game.event_processor.event_player as event_player
         self.__eventp[events.MSG_CS_LOGIN] = event_loginout.eventp_login()
+        self.__eventp[events.MSG_CS_I_AM_OK] = event_loginout.eventp_iamok()
         self.__eventp[events.MSG_CS_LOGOUT] = event_loginout.eventp_logout()
         
         self.__eventp[events.MSG_CS_POSITION] = event_player.eventp_position()
+        self.__eventp[events.MSG_CS_PLAYER_RUN] = event_player.eventp_run()
+        self.__eventp[events.MSG_CS_PLAYER_STOP] = event_player.eventp_stop()
     
     # ============= connection & packet ========================
     def do_conn_comes(self, conn):
@@ -54,10 +57,14 @@ class controller(network.net_callback):
         for ply in self.Players.values():
             ply.update()
             
-    def broadcast(self, pkt, without_ply_name = None):
+    def broadcast(self, pkt, without_player_name = None):
+        print "broadcast", self.Players
         for ply in self.Players.values():
-            if ply.is_ok() and ply.name != without_ply_name:
+            if ply.is_ok() and ply.name != without_player_name:
+                print "broadcast to:", ply.name
                 ply.send_packet(pkt)
+            else:
+                print "dont send to:", ply.name, ply.get_state()
             
     def born_enemy(self, name, x, z):
         import game.enemy.enemy as enemy

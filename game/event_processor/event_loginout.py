@@ -91,6 +91,9 @@ class eventp_iamok(ieventp.ieventp):
         if not ply:
             return;
         
+        print "set ok"
+        ply.set_ok()
+        
         import game.controller
         gcontroller = game.controller.gcontroller
         
@@ -103,10 +106,12 @@ class eventp_iamok(ieventp.ieventp):
         import network
         x, z = pkt.x, pkt.z
         pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = x, z = z, hero = ply.hero)
-        gcontroller.broadcast(pkt, withou_player_name = ply.name)
+        gcontroller.broadcast(pkt, without_player_name = ply.name)
         
-        # 3. sent other players info
+        # 3. sent other players info to this ply
         for other_ply in gcontroller.Players.values():
-            pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = other_ply.name, hero = other_ply.hero, x = 10000, z = 10000)
-            ply.send_packet(pkt)
+            if other_ply != ply:
+                pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = other_ply.name, hero = other_ply.hero, 
+                                        x = 10000, z = 10000, dir_x = 1, dir_z = 1, velocity = 0)
+                ply.send_packet(pkt)
         

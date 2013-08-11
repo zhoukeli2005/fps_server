@@ -13,8 +13,8 @@ def get_ply(conn):
     return None
 
 class player(object):
-    def __init__(self, data, conn):
-        self.name = data.name
+    def __init__(self, d, conn):
+        self.name = d.name
         self.__conn = conn
         self.__state = constants.PLAYER_STATE_LOGIN
         conn.ply = self 
@@ -30,6 +30,9 @@ class player(object):
     
     def set_ok(self):
         self.__state = constants.PLAYER_STATE_OK
+        
+    def get_state(self):
+        return self.__state
     
     def update(self):
         pass
