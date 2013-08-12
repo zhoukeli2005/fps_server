@@ -59,10 +59,12 @@ def is_walkable(x, z):
     return maps[xpos][zpos] == 1
     
 def find_nearest_walkable(x, z):
-    loop = 1000
+    loop = 10000
     curr_step = 0
     steps = 1
     direction = 0
+    aug = 0.2
+    tmp_x, tmp_z = x, z
     
     while loop > 0:
         loop -= 1
@@ -70,13 +72,13 @@ def find_nearest_walkable(x, z):
             return x, z
         
         if direction == 0:    # right
-            x += 1
+            x += aug
         elif direction == 1:  # up
-            z += 1
+            z += aug
         elif direction == 2:  # left
-            x -= 1
+            x -= aug
         else:           # down
-            z -= 1
+            z -= aug
             
         curr_step += 1
         if curr_step >= steps:
@@ -85,7 +87,7 @@ def find_nearest_walkable(x, z):
                 steps += 1
             direction = (direction + 1) % 4
             
-    return x, z
+    return tmp_x, tmp_z
 
 def can_direct_reach(from_x, from_z, to_x, to_z):
     from_x, to_x = from_x - MinX, to_x - MinX

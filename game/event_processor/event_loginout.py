@@ -93,6 +93,7 @@ class eventp_iamok(ieventp.ieventp):
         
         print "set ok"
         ply.set_ok()
+        ply.pos.x, ply.pos.z = pkt.x, pkt.z
         
         import game.controller
         gcontroller = game.controller.gcontroller

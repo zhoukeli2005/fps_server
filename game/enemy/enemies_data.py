@@ -11,6 +11,8 @@ Data = {
         "e1" : {
                 "name" : "e1",
                 "hp" : 1000,
+                "cd" : 3,
+                "fire_range" : 4,
                 "walk_velocity" : 3,
                 "level" : 1,
                 "exp" : 5
@@ -18,6 +20,7 @@ Data = {
         "e2" : {
                 "name" : "e2",
                 "hp" : 100,
+                "cd" : 3,
                 "walk_velocity" : 3.1,
                 "level" : 1,
                 "exp" : 3

@@ -12,6 +12,12 @@ def get_ply(conn):
         return conn.ply
     return None
 
+def get_ply_by_name(name):
+    import game.controller
+    if not name in game.controller.gcontroller.Players:
+        return None
+    return game.controller.gcontroller.Players[name]
+
 class player(object):
     def __init__(self, d, conn):
         self.name = d.name

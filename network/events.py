@@ -22,6 +22,7 @@ MSG_SC_ENEMY_STOP   = 0x2003
 MSG_SC_ENEMY_RUN    = 0x2004
 MSG_SC_ENEMY_DEAD   = 0x2005
 MSG_SC_ENEMY_BEATEN = 0x2006
+MSG_SC_ENEMY_FIRE   = 0x2007
 
 MSG_SC_OTHER_LOGIN  = 0x2010
 MSG_SC_OTHER_LOGOUT = 0x2011
@@ -51,6 +52,7 @@ packet.register( MSG_SC_ENEMY_BORN,     ( "id:I", "name:s", "x:d", "z:d", "next_
 packet.register( MSG_SC_ENEMY_STOP,     ( "id:I", "x:d", "z:d" ) )
 packet.register( MSG_SC_ENEMY_RUN,      ( "id:I", "x:d", "z:d", "next_x:d", "next_z:d", "velocity:d" ) )
 packet.register( MSG_SC_ENEMY_DEAD,     ( "id:I", ) )
+packet.register( MSG_SC_ENEMY_FIRE,     ( "id:I", "dir_x:d", "dir_z:d" ) )
 
 packet.register( MSG_SC_OTHER_LOGIN,    ( "name:s", "x:d", "z:d", "hero:s") )
 packet.register( MSG_SC_OTHER_LOGOUT,   ( "name:s", ) )

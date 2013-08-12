@@ -66,7 +66,7 @@ class eventp_magic(ieventp.ieventp):
         game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
         
 #===================== Event Bullet ============================================
-BULLET_ID = 0
+
 class eventp_bullet(ieventp.ieventp):
     def run(self, conn, pkt):
         import game.player
@@ -76,23 +76,11 @@ class eventp_bullet(ieventp.ieventp):
             return
         
         # 1. broadcast to everyone
-        import network, constants
-        global BULLET_ID
-        BULLET_ID += 1
-        bid = BULLET_ID
-        bpkt = network.packet.packet(network.events.MSG_SC_OTHER_BULLET,
-                                     id = bid,
-                                     name = ply.name, 
-                                     x = pkt.x, y = pkt.y, z = pkt.z, 
-                                     dir_x = pkt.dir_x, dir_z = pkt.dir_z, 
-                                     velocity = constants.BulletVelocity)
-        import game.controller
-        game.controller.gcontroller.broadcast(bpkt)
+        import game.bullet
+        game.bullet.create_bullet(ply.name, pkt.x, pkt.y, pkt.z, pkt.dir_x, pkt.dir_z)
         
-        # 2. save in server
-        import data
-        d = data.data(ply = ply.name, id = bid)
-        game.controller.gcontroller.Bullets[bid] = d
+        
+       
         
 #====================== Event Bullet End =====================================
 class eventp_bullet_end(ieventp.ieventp):
@@ -151,6 +139,10 @@ class eventp_bullet_hit(ieventp.ieventp):
         
         # [check] 3. bullet - player auth
         d = gcontroller.Bullets[bid]
+        if d.ply[:5] == "enemy":
+            # enemy bullet hit player
+            pass
+        
         if d.ply != ply.name:
             print "[warning] event bullet hit, player name error", ply.name, d.ply
             return
