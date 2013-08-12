@@ -15,6 +15,7 @@ class controller(network.net_callback):
         network.init(self)
         self.Players = {}
         self.Enemies = {}
+        self.Bullets = {}
         self.__eventp = {}
         
         maps.load(".\\maps")
@@ -29,6 +30,11 @@ class controller(network.net_callback):
         self.__eventp[events.MSG_CS_POSITION] = event_player.eventp_position()
         self.__eventp[events.MSG_CS_PLAYER_RUN] = event_player.eventp_run()
         self.__eventp[events.MSG_CS_PLAYER_STOP] = event_player.eventp_stop()
+        self.__eventp[events.MSG_CS_PLAYER_MAGIC] = event_player.eventp_magic()
+        
+        self.__eventp[events.MSG_CS_PLAYER_BULLET] = event_player.eventp_bullet()
+        self.__eventp[events.MSG_CS_PLAYER_BULLET_END] = event_player.eventp_bullet_end()
+        self.__eventp[events.MSG_CS_PLAYER_BULLET_HIT] = event_player.eventp_bullet_hit()
     
     # ============= connection & packet ========================
     def do_conn_comes(self, conn):
@@ -49,7 +55,11 @@ class controller(network.net_callback):
         
         if len(self.Enemies) < 1:
             # test : create an enemy
-            self.born_enemy("e1", -2, 0)
+            import random
+            pos = ((-2, 0), (-10, 0))
+            i = random.randint(0, 1)
+            p = pos[i]
+            self.born_enemy("e1", p[0], p[1])
         
         for enemy in self.Enemies.values():
             enemy.update()

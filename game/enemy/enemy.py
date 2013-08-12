@@ -38,6 +38,8 @@ class enemy(object):
         self.__data.pos.z = z
         self.__data.id = self.id
         
+        self.hp = 100
+        
         # state machine
         self.__statem = state_manager.istate_manager()
         self.__statem.register(STATE_IDLE, state_idle(self.__data))

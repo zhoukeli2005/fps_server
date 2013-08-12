@@ -104,8 +104,7 @@ class eventp_iamok(ieventp.ieventp):
             
         # 2. broadcast to everyone without this ply
         import network
-        x, z = pkt.x, pkt.z
-        pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = x, z = z, hero = ply.hero)
+        pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = pkt.x, z = pkt.z, hero = ply.hero)
         gcontroller.broadcast(pkt, without_player_name = ply.name)
         
         # 3. sent other players info to this ply
