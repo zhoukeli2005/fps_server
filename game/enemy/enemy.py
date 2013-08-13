@@ -19,6 +19,7 @@ import util
 STATE_IDLE = "idle"
 STATE_RUN = "run"
 STATE_FIRE = "fire"
+STATE_BEATEN = "beaten"
 
 ENEMY_ID = 1
 
@@ -48,6 +49,7 @@ class enemy(object):
         self.__statem.register(STATE_IDLE, state_idle(self.__data, self))
         self.__statem.register(STATE_RUN, state_run(self.__data, self))
         self.__statem.register(STATE_FIRE, state_fire(self.__data, self))
+        self.__statem.register(STATE_BEATEN, state_beaten(self.__data, self))
         self.__statem.change_to(STATE_IDLE, None)
         
         # broadcast enemy born
@@ -57,6 +59,12 @@ class enemy(object):
     def update(self):
         self.__statem.update()
         
+    def get_pos(self):
+        return self.__data.pos
+    
+    def get_id(self):
+        return self.__data.id
+        
     def move_to(self, x, z):
         import game.maps
         x, z = game.maps.maps.find_nearest_walkable(x, z)        
@@ -64,6 +72,10 @@ class enemy(object):
         
     def fire(self, x, z):
         self.__statem.change_to(STATE_FIRE, (x, z))
+        
+    def beaten(self, dir_x, dir_z):
+        print "enemy beaten", dir_x, dir_z
+        self.__statem.change_to(STATE_BEATEN, (dir_x, dir_z))
         
     def find_nearest_player(self):
         import game.controller
@@ -78,6 +90,15 @@ class enemy(object):
             self.__data.target = player.name
             
         return player
+    
+    def find_player_in_fire_range(self):
+        import game.controller
+        dis = self.__data.fire_range ** 2
+        for ply in game.controller.gcontroller.Players.values():
+            d = (ply.pos.x - self.__data.pos.x) ** 2 + (ply.pos.z - self.__data.pos.z) ** 2
+            if dis >= d:
+                return ply
+        return None
                 
     def get_target(self):
         if not self.__data.target:
@@ -134,7 +155,7 @@ class state_idle(state_manager.istate):
             if ply:
                 self.__enemy.move_to(ply.pos.x, ply.pos.z)
                 
-        if now - self._enter_time > 3000:
+        if now - self._enter_time > 500:
             import random, game.maps
             self.__enemy.move_to(random.randint(game.maps.maps.MinX, game.maps.maps.MaxX),
                                  random.randint(game.maps.maps.MinZ, game.maps.maps.MaxZ))
@@ -167,8 +188,8 @@ class state_run(state_manager.istate):
     
     def update(self):
         # 1. check target
-        target = self.__enemy.get_target()
-        if target and util.distance(self.__data.pos, target.pos) <= self.__data.fire_range:
+        target = self.__enemy.find_player_in_fire_range()
+        if target:
             self.__enemy.clear_target()
             self.__enemy.fire(target.pos.x, target.pos.z)
             return;
@@ -246,6 +267,8 @@ class state_fire(state_manager.istate):
         self.__dir_x = target_x - self.__data.pos.x
         self.__dir_z = target_z - self.__data.pos.z
         
+        self.__dir_x, self.__dir_z = util.normalize(self.__dir_x, self.__dir_z)
+        
         pkt = network.packet.packet(network.events.MSG_SC_ENEMY_FIRE, 
                                     id = self.__data.id, 
                                     dir_x = target_x - self.__data.pos.x,
@@ -255,19 +278,47 @@ class state_fire(state_manager.istate):
 
     def update(self):
         now = timer.gtimer.current()
-        if self.__state == 0 and now - self._enter_time > 1000:
-            print "fire ok"
+        if self.__state == 0 and now - self._enter_time > 500:
             self.__data.last_fire_time = now
             self.__state = 1
             import game.bullet
             pos = self.__data.pos
             game.bullet.create_bullet("enemy%d" % self.__data.id, 
-                                      pos.x, 1, pos.z, 
+                                      pos.x + self.__dir_x * 1.2,
+                                      1.5, 
+                                      pos.z + self.__dir_z * 1.2, 
                                       self.__dir_x,
-                                      self.__dir_z)
+                                      self.__dir_z,
+                                      self.__data.bullet)
             
-        if self.__state == 1 and now - self._enter_time > 3000:
+        if self.__state == 1 and now - self._enter_time > 1000:
             self._statem.change_to(STATE_IDLE, None)
             
             
+#====================== Beaten ================================
+class state_beaten(state_manager.istate):
+    def __init__(self, d, e):
+        self.__data = d
+        self.__enemy = e
+        
+    def enter(self, param):
+        
+        self.__dir_x, self.__dir_z = util.normalize(param[0], param[1])
+        
+        self.__data.pos.x += self.__dir_x * 0.5
+        self.__data.pos.z += self.__dir_z * 0.5
+        
+        pkt = network.packet.packet(network.events.MSG_SC_ENEMY_BEATEN, 
+                                    id = self.__data.id, 
+                                    x = self.__data.pos.x,
+                                    z = self.__data.pos.z)
+        
+        game.controller.gcontroller.broadcast(pkt)
+
+    def update(self):
+        now = timer.gtimer.current()
+        if now - self._enter_time > 500:
+            # can not fire immediately
+            self.__data.last_fire_time = now            
+            self._statem.change_to(STATE_IDLE, None)
             

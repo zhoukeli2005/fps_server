@@ -16,6 +16,7 @@ class controller(network.net_callback):
         self.Players = {}
         self.Enemies = {}
         self.Bullets = {}
+        self.Items = {}
         self.__eventp = {}
         
         maps.load(".\\maps")
@@ -23,6 +24,8 @@ class controller(network.net_callback):
         # register event processor
         import game.event_processor.event_loginout as event_loginout
         import game.event_processor.event_player as event_player
+        import game.event_processor.event_item as event_item
+        
         self.__eventp[events.MSG_CS_LOGIN] = event_loginout.eventp_login()
         self.__eventp[events.MSG_CS_I_AM_OK] = event_loginout.eventp_iamok()
         self.__eventp[events.MSG_CS_LOGOUT] = event_loginout.eventp_logout()
@@ -31,10 +34,13 @@ class controller(network.net_callback):
         self.__eventp[events.MSG_CS_PLAYER_RUN] = event_player.eventp_run()
         self.__eventp[events.MSG_CS_PLAYER_STOP] = event_player.eventp_stop()
         self.__eventp[events.MSG_CS_PLAYER_MAGIC] = event_player.eventp_magic()
+        self.__eventp[events.MSG_CS_PLAYER_CHANGE_WEAPON] = event_player.eventp_change_weapon()
         
         self.__eventp[events.MSG_CS_PLAYER_BULLET] = event_player.eventp_bullet()
         self.__eventp[events.MSG_CS_PLAYER_BULLET_END] = event_player.eventp_bullet_end()
         self.__eventp[events.MSG_CS_PLAYER_BULLET_HIT] = event_player.eventp_bullet_hit()
+        
+        self.__eventp[events.MSG_CS_PICK_ITEM] = event_item.eventp_pick()
     
     # ============= connection & packet ========================
     def do_conn_comes(self, conn):
@@ -60,6 +66,11 @@ class controller(network.net_callback):
             i = random.randint(0, 1)
             p = pos[i]
             self.born_enemy("e1", p[0], p[1])
+            
+        if len(self.Items) < 1:
+            # test : create an item
+            import item, constants
+            item.create_item(constants.ItemBarrel, -2, 0)
         
         for enemy in self.Enemies.values():
             enemy.update()

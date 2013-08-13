@@ -6,9 +6,12 @@
 #======================================================================
 
 users = {
-         "netease001" : "163",
-         "netease002" : "163",
-         "netease003" : "163"
+         "netease1" : "163",
+         "netease2" : "163",
+         "netease3" : "163",
+         "netease4" : "163",
+         "netease5" : "163",
+         "netease6" : "163"
 }
 
 import ieventp
@@ -103,15 +106,26 @@ class eventp_iamok(ieventp.ieventp):
             pkt = enemy.get_born_pkt()
             ply.send_packet(pkt)
             
-        # 2. broadcast to everyone without this ply
+        # 2. send item info
+        import game.item
+        for itm in gcontroller.Items.values():
+            pkt = game.item.get_born_pkt(itm)
+            ply.send_packet(pkt)
+            
+        # 3. broadcast to everyone without this ply
         import network
-        pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = pkt.x, z = pkt.z, hero = ply.hero)
+        pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = ply.name, x = pkt.x, z = pkt.z, hero = ply.hero, weapon = ply.weapon)
         gcontroller.broadcast(pkt, without_player_name = ply.name)
         
-        # 3. sent other players info to this ply
+        # 4. sent other players info to this ply
         for other_ply in gcontroller.Players.values():
             if other_ply != ply:
-                pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, name = other_ply.name, hero = other_ply.hero, 
-                                        x = 10000, z = 10000, dir_x = 1, dir_z = 1, velocity = 0)
+                pkt = network.packet.packet(network.events.MSG_SC_OTHER_LOGIN, 
+                                            name = other_ply.name, 
+                                            hero = other_ply.hero, 
+                                            weapon = other_ply.weapon,
+                                            x = 10000, z = 10000, 
+                                            dir_x = 1, dir_z = 1, 
+                                            velocity = 0)
                 ply.send_packet(pkt)
         

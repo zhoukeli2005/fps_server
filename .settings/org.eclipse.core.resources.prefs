@@ -1,10 +1,13 @@
 eclipse.preferences.version=1
+encoding//game/bag.py=utf-8
 encoding//game/bullet.py=utf-8
 encoding//game/controller.py=utf-8
 encoding//game/enemy/enemies_data.py=utf-8
 encoding//game/enemy/enemy.py=utf-8
+encoding//game/event_processor/event_item.py=utf-8
 encoding//game/event_processor/event_loginout.py=utf-8
 encoding//game/event_processor/event_player.py=utf-8
+encoding//game/item.py=utf-8
 encoding//game/maps/maps.py=utf-8
 encoding//game/player.py=utf-8
 encoding//misc/state_manager.py=utf-8
