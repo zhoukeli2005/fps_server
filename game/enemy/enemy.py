@@ -14,7 +14,7 @@ import math
 import network.events
 import network.packet
 import game
-import util
+import misc.util
 
 STATE_IDLE = "idle"
 STATE_RUN = "run"
@@ -267,7 +267,7 @@ class state_fire(state_manager.istate):
         self.__dir_x = target_x - self.__data.pos.x
         self.__dir_z = target_z - self.__data.pos.z
         
-        self.__dir_x, self.__dir_z = util.normalize(self.__dir_x, self.__dir_z)
+        self.__dir_x, self.__dir_z = misc.util.normalize(self.__dir_x, self.__dir_z)
         
         pkt = network.packet.packet(network.events.MSG_SC_ENEMY_FIRE, 
                                     id = self.__data.id, 
@@ -303,7 +303,7 @@ class state_beaten(state_manager.istate):
         
     def enter(self, param):
         
-        self.__dir_x, self.__dir_z = util.normalize(param[0], param[1])
+        self.__dir_x, self.__dir_z = misc.util.normalize(param[0], param[1])
         
         self.__data.pos.x += self.__dir_x * 0.5
         self.__data.pos.z += self.__dir_z * 0.5

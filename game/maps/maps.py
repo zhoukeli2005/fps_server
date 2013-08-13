@@ -6,7 +6,7 @@
 #======================================================================
 
 import struct
-import util
+import misc.util
 
 MinX = 0
 MaxX = 0
@@ -107,9 +107,9 @@ def can_direct_reach(from_x, from_z, to_x, to_z):
                 
     if to_z != from_z:
         z = int(from_z)
-        sgn = util.sgn(to_z - from_z)
+        sgn = misc.util.sgn(to_z - from_z)
         d = (to_x - from_x) / (to_z - from_z)
-        while util.sgn(to_z - z) == sgn:
+        while misc.util.sgn(to_z - z) == sgn:
             x = from_x + (z - from_z) * d
             if not is_walkable(x + MinX, z + MinZ):
                 return False
