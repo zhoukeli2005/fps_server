@@ -11,8 +11,13 @@ PLAYER_STATE_OK = "ok"
 # bag
 BAG_SIZE = 5
 
-# melee attack
+# player melee attack range
 MELEE_RANGE = 2
+
+# player damage
+PlayerBulletDamage = 80
+PlayerMeleeDamage = 50
+PlayerBarrelDamage = 200
 
 # magic types
 MAGIC_NONE  = 0x0000
@@ -32,3 +37,6 @@ ItemBullet = 2
 # weapon type
 WeaponNormal = 1
 WeaponBarrel = 2
+
+# data path
+DataPath = "./data/"

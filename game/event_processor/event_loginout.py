@@ -49,7 +49,9 @@ class eventp_login(ieventp.ieventp):
             return
                
         # build data
-        d = data.data()
+        import player_data.player_data
+        d = player_data.player_data.load(name)
+        
         d.name = name                  
                 
         import game.player as player

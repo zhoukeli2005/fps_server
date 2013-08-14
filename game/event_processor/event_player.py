@@ -15,6 +15,20 @@ class eventp_position(ieventp.ieventp):
         for enemy in gcontroller.Enemies.values():
             enemy.move_to(pkt.x, pkt.z)
             
+#================== Event Chat ===========================
+class eventp_chat(ieventp.ieventp):
+    def run(self, conn, pkt):
+        import game.player
+        ply = game.player.get_ply(conn)
+        if not ply:
+            print "[warning] event player chat, no such player:", ply.name
+            return
+        
+        import network
+        bpkt = network.packet.packet(network.events.MSG_SC_CHAT, name = ply.name, msg = pkt.msg)
+        import game.controller
+        game.controller.gcontroller.broadcast(bpkt)
+            
 #================= Event Run ==============================
 class eventp_run(ieventp.ieventp):
     def run(self, conn, pkt):
@@ -47,7 +61,7 @@ class eventp_stop(ieventp.ieventp):
         ply.pos.z = pkt.z
         
         import network
-        bpkt = network.packet.packet(network.events.MSG_SC_OTHER_STOP, name = ply.name, x = pkt.x, z = pkt.z, dir_x = pkt.dir_x, dir_z = pkt.dir_z)
+        bpkt = network.packet.packet(network.events.MSG_SC_OTHER_STOP, name = ply.name, x = pkt.x, z = pkt.z, dir_x = pkt.dir_x, dir_z = pkt.dir_z, smooth = pkt.smooth)
         import game.controller
         game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
         
@@ -82,6 +96,55 @@ class eventp_change_weapon(ieventp.ieventp):
         game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
         
         
+#====================== Event Dead & Revive ====================================
+class eventp_dead(ieventp.ieventp):
+    def run(self, conn, pkt):
+        import game.player
+        ply = game.player.get_ply(conn)
+        if not ply:
+            print "[warning] event player stop, no such player:", ply.name
+            return
+        
+        ply.dead = True if pkt.dead == 1 else False
+        
+        import network
+        bpkt = network.packet.packet(network.events.MSG_SC_DEAD, name = ply.name, dead = pkt.dead)
+        import game.controller
+        game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
+        
+        
+#====================== Event Add Run Distance ================================
+class eventp_add_run_distance(ieventp.ieventp):
+    def run(self, conn, pkt):
+        import game.player
+        ply = game.player.get_ply(conn)
+        if not ply:
+            print "[warning] event player stop, no such player:", ply.name
+            return
+        
+        ply.add_run_distance(pkt.distance)
+        ply.add_point(pkt.distance)
+        
+        
+#==================== Event State Beaten ======================================
+class eventp_state_beaten(ieventp.ieventp):
+    def run(self, conn, pkt):
+        import game.player
+        ply = game.player.get_ply(conn)
+        if not ply:
+            print "[warning] event player state beaten, no such player:", ply.name
+            return
+        
+        ply.pos.x = pkt.x
+        ply.pos.z = pkt.z
+        
+        # just broadcast
+        import network
+        bpkt = network.packet.packet(network.events.MSG_SC_OTHER_STATE_BEATEN, name = ply.name, x = pkt.x, z = pkt.z, dir_x = pkt.dir_x, dir_z = pkt.dir_z)
+        import game.controller
+        game.controller.gcontroller.broadcast(bpkt, without_player_name = ply.name)
+        
+        
 #===================== Event Bullet ============================================
 
 class eventp_bullet(ieventp.ieventp):
@@ -92,17 +155,25 @@ class eventp_bullet(ieventp.ieventp):
             print "[warning] event bullet, no such player:", ply.name
             return
         
-        # [check] player has bullet ?
         import constants
+        
+        damage = constants.PlayerBulletDamage
+        # [check] player has bullet barrel ?
         if pkt.tt == constants.BulletBarrel:
+            damage = constants.PlayerBarrelDamage
             if ply.bag.count(constants.ItemBarrel) <= 0:
                 print "[warning] no bullet-barrel", ply.name
                 return
             ply.bag.remove(constants.ItemBarrel, 1)
 
+        if pkt.tt == constants.BulletMelee:
+            damage = constants.PlayerMeleeDamage
+            
+        ply.add_point(damage * 0.01)
+            
         # 1. broadcast to everyone
         import game.bullet
-        game.bullet.create_bullet(ply.name, pkt.x, pkt.y, pkt.z, pkt.dir_x, pkt.dir_z, pkt.tt)
+        game.bullet.create_bullet(ply.name, pkt.x, pkt.y, pkt.z, pkt.dir_x, pkt.dir_z, pkt.tt, damage)
         
         
        
@@ -171,7 +242,7 @@ class eventp_bullet_hit(ieventp.ieventp):
         d = gcontroller.Bullets[bid]
         if d.ply[:5] == "enemy":
             # enemy bullet hit player
-            game.bullet.hit_player(d.ply, ply.name, 50)
+            game.bullet.hit_player(d.ply, ply.name, d.damage, d.dir_x, d.dir_z)
             return
         
         # [check] 4. bullet - player auth
@@ -184,10 +255,11 @@ class eventp_bullet_hit(ieventp.ieventp):
         
         # 1. hit enemy
         if eid > 0:
-            game.bullet.hit_enemy(ply.name, eid, 50, d.dir_x, d.dir_z)
+            game.bullet.hit_enemy(ply.name, eid, d.damage, d.dir_x, d.dir_z)
             return
         
         # 2. hit other player
         print "hit other player", other
-        game.bullet.hit_player(ply.name, other, 50)
+        game.bullet.hit_player(ply.name, other, d.damage, d.dir_x, d.dir_z)
+        
             

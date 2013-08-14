@@ -26,5 +26,5 @@ def main():
         # do logical update
         game_controller.update()
       
-# do the job!  
+# do the job!
 main()

@@ -23,7 +23,7 @@ STATE_BEATEN = "beaten"
 
 ENEMY_ID = 1
 
-#=================== Enemy & State Machine ===========================
+#=================== Enemy & Enemy's State Machine ===========================
 class enemy(object):
     def __init__(self, name, x, z):
         
@@ -42,7 +42,7 @@ class enemy(object):
         self.__data.last_fire_time = timer.gtimer.current()
         self.__data.target = None
         
-        self.hp = 100
+        self.hp = self.__data.hp
         
         # state machine
         self.__statem = state_manager.istate_manager()
@@ -64,6 +64,14 @@ class enemy(object):
     
     def get_id(self):
         return self.__data.id
+    
+    def get_damage(self):
+        return self.__data.damage
+    
+    def can_fire(self):
+        if timer.gtimer.current() - self.__data.last_fire_time >= self.__data.cd * 1000:
+            return True
+        return False
         
     def move_to(self, x, z):
         import game.maps
@@ -74,7 +82,6 @@ class enemy(object):
         self.__statem.change_to(STATE_FIRE, (x, z))
         
     def beaten(self, dir_x, dir_z):
-        print "enemy beaten", dir_x, dir_z
         self.__statem.change_to(STATE_BEATEN, (dir_x, dir_z))
         
     def find_nearest_player(self):
@@ -82,6 +89,8 @@ class enemy(object):
         dis = 0
         player = None
         for ply in game.controller.gcontroller.Players.values():
+            if ply.dead:
+                continue;
             d = abs(ply.pos.x - self.__data.pos.x) + abs(ply.pos.z - self.__data.pos.z)
             if not player or dis > d:
                 player = ply
@@ -91,22 +100,36 @@ class enemy(object):
             
         return player
     
-    def find_player_in_fire_range(self):
+    def find_player_in_range(self, the_range):
         import game.controller
-        dis = self.__data.fire_range ** 2
+        dis = the_range ** 2
         for ply in game.controller.gcontroller.Players.values():
+            if ply.dead:
+                continue;
             d = (ply.pos.x - self.__data.pos.x) ** 2 + (ply.pos.z - self.__data.pos.z) ** 2
             if dis >= d:
                 return ply
         return None
+    
+    def find_player_in_fire_range(self):
+        return self.find_player_in_range(self.__data.fire_range)
+    
+    def find_player_in_view_range(self):
+        return self.find_player_in_range(self.__data.view_range)
+    
+    def is_in_view_range(self, pos):
+        d = (self.__data.pos.x - pos.x) ** 2 + (self.__data.pos.z - pos.z) ** 2
+        dis = self.__data.view_range ** 2
+        return d <= dis
                 
     def get_target(self):
         if not self.__data.target:
             return None
         import game.player
         ply = game.player.get_ply_by_name(self.__data.target)
-        if not ply:
+        if not ply or ply.dead:
             self.__data.target = None
+            ply = None
             
         return ply
     
@@ -150,7 +173,8 @@ class state_idle(state_manager.istate):
         
     def update(self):
         now = timer.gtimer.current()
-        if now - self.__data.last_fire_time > self.__data.cd * 1000:
+     #   if now - self.__data.last_fire_time > self.__data.cd * 1000:
+        if self.__enemy.can_fire():
             ply = self.__enemy.find_nearest_player()
             if ply:
                 self.__enemy.move_to(ply.pos.x, ply.pos.z)
@@ -185,14 +209,41 @@ class state_run(state_manager.istate):
     
     def re_enter(self, param):
         self.enter(param)
-    
-    def update(self):
+        
+    def icheck_target(self):
+        
+        # 0. check fire cd
+        if not self.__enemy.can_fire():
+            return False
+        
         # 1. check target
         target = self.__enemy.find_player_in_fire_range()
         if target:
             self.__enemy.clear_target()
             self.__enemy.fire(target.pos.x, target.pos.z)
-            return;
+            return True;
+        
+        target = self.__enemy.get_target()
+        # 2. check view range
+        if not target or not self.__enemy.is_in_view_range(target.pos):
+            ply_in_view = self.__enemy.find_player_in_view_range()
+            if ply_in_view:
+                self._statem.change_to(STATE_IDLE, None)
+                return True
+            
+        # 3. check target position
+        if target:
+            if abs(target.pos.x - self.__target_x) > 2 or abs(target.pos.z - self.__target_z) > 2:
+                self.enter((target.pos.x, target.pos.z))
+                return True
+            
+        return False
+    
+    def update(self):
+        
+        # 1. check should stop or fire
+        if self.icheck_target():
+            return
 
         # 2. move
         now = timer.gtimer.current()
@@ -230,7 +281,10 @@ class state_run(state_manager.istate):
         L = delta_x ** 2 + delta_z ** 2
         L = math.sqrt(L)
         
-        self.__dir = data.data(x = delta_x / L, z = delta_z / L)
+        if L <= 0:
+            self.__dir = data.data(x = delta_x, z = delta_z)
+        else:        
+            self.__dir = data.data(x = delta_x / L, z = delta_z / L)
         self.__last_waypoint = data.data(x = curr_waypoint[0], z = curr_waypoint[1])
         self.__next_waypoint = data.data(x = next_waypoint[0], z = next_waypoint[1])
         self.__L = L
@@ -289,7 +343,9 @@ class state_fire(state_manager.istate):
                                       pos.z + self.__dir_z * 1.2, 
                                       self.__dir_x,
                                       self.__dir_z,
-                                      self.__data.bullet)
+                                      self.__data.bullet,
+                                      self.__data.damage
+                                      )
             
         if self.__state == 1 and now - self._enter_time > 1000:
             self._statem.change_to(STATE_IDLE, None)

@@ -30,11 +30,15 @@ class controller(network.net_callback):
         self.__eventp[events.MSG_CS_I_AM_OK] = event_loginout.eventp_iamok()
         self.__eventp[events.MSG_CS_LOGOUT] = event_loginout.eventp_logout()
         
+        self.__eventp[events.MSG_CS_CHAT] = event_player.eventp_chat()
         self.__eventp[events.MSG_CS_POSITION] = event_player.eventp_position()
         self.__eventp[events.MSG_CS_PLAYER_RUN] = event_player.eventp_run()
         self.__eventp[events.MSG_CS_PLAYER_STOP] = event_player.eventp_stop()
         self.__eventp[events.MSG_CS_PLAYER_MAGIC] = event_player.eventp_magic()
         self.__eventp[events.MSG_CS_PLAYER_CHANGE_WEAPON] = event_player.eventp_change_weapon()
+        self.__eventp[events.MSG_CS_DEAD] = event_player.eventp_dead()
+        self.__eventp[events.MSG_CS_ADD_RUN_DISTANCE] = event_player.eventp_add_run_distance()
+        self.__eventp[events.MSG_CS_PLAYER_STATE_BEATEN] = event_player.eventp_state_beaten()
         
         self.__eventp[events.MSG_CS_PLAYER_BULLET] = event_player.eventp_bullet()
         self.__eventp[events.MSG_CS_PLAYER_BULLET_END] = event_player.eventp_bullet_end()
@@ -59,18 +63,13 @@ class controller(network.net_callback):
     # ============== game logic =============================
     def update(self):
         
-        if len(self.Enemies) < 1:
-            # test : create an enemy
-            import random
-            pos = ((-2, 0), (-10, 0))
-            i = random.randint(0, 1)
-            p = pos[i]
-            self.born_enemy("e1", p[0], p[1])
-            
-        if len(self.Items) < 1:
-            # test : create an item
-            import item, constants
-            item.create_item(constants.ItemBarrel, -2, 0)
+        # born enemy
+        import game.enemy.enemy_born as enemy_born
+        enemy_born.gEnemyBorn.check_born()
+        
+        # born item
+        import game.item_born as item_born
+        item_born.gItemBorn.check_born()
         
         for enemy in self.Enemies.values():
             enemy.update()

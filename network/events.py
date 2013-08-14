@@ -18,6 +18,11 @@ MSG_CS_PLAYER_CHANGE_WEAPON = 0x1011
 
 MSG_CS_PICK_ITEM    = 0x1012
 
+MSG_CS_CHAT         = 0x1013
+MSG_CS_DEAD         = 0x1014
+MSG_CS_ADD_RUN_DISTANCE     = 0x1015
+MSG_CS_PLAYER_STATE_BEATEN    = 0x1016
+
 
 
 MSG_SC_LOGIN        = 0x2001
@@ -38,9 +43,16 @@ MSG_SC_OTHER_BULLET         = 0x2015
 MSG_SC_OTHER_BULLET_END     = 0x2016
 MSG_SC_OTHER_BULLET_HIT     = 0x2017
 MSG_SC_OTHER_CHANGE_WEAPON  = 0x2018
+MSG_SC_OTHER_BEATEN = 0x2019
 
-MSG_SC_ITEM_BORN    = 0x2020
-MSG_SC_ITEM_PICKED     = 0x2021
+MSG_SC_ITEM_BORN        = 0x2020
+MSG_SC_ITEM_PICKED      = 0x2021
+
+MSG_SC_CHAT             = 0x2022
+MSG_SC_DEAD             = 0x2023
+MSG_SC_ADD_RUN_DISTANCE = 0x2024
+MSG_SC_ADD_POINT        = 0x2025
+MSG_SC_OTHER_STATE_BEATEN   = 0x2026
 
 
 # =========== Client To Server ===================================
@@ -48,7 +60,7 @@ packet.register( MSG_CS_LOGIN,          ( "name:s", "password:s" ) )
 packet.register( MSG_CS_POSITION,       ( "x:d", "z:d" ) )
 packet.register( MSG_CS_I_AM_OK,        ( "x:d", "z:d" ) )
 packet.register( MSG_CS_PLAYER_RUN,     ( "x:d", "z:d", "dir_x:d", "dir_z:d", "velocity:d" ) )
-packet.register( MSG_CS_PLAYER_STOP,    ( "x:d", "z:d", "dir_x:d", "dir_z:d" ) )
+packet.register( MSG_CS_PLAYER_STOP,    ( "x:d", "z:d", "dir_x:d", "dir_z:d", "smooth:H" ) )
 packet.register( MSG_CS_PLAYER_MAGIC,   ( "magic:H", ) )
 packet.register( MSG_CS_PLAYER_BULLET,  ( "x:d", "y:d", "z:d", "dir_x:d", "dir_z:d", "tt:H" ) )
 packet.register( MSG_CS_PLAYER_BULLET_END,  ( "id:I", ) )
@@ -56,6 +68,11 @@ packet.register( MSG_CS_PLAYER_BULLET_HIT,  ( "id:I", "enemy:I", "player:s", "di
 packet.register( MSG_CS_PLAYER_CHANGE_WEAPON, ( "weapon:H", ) )
 
 packet.register( MSG_CS_PICK_ITEM, ( "id:I", ) )
+
+packet.register( MSG_CS_CHAT, ( "msg:s", ) )
+packet.register( MSG_CS_DEAD, ( "dead:h", ) )
+packet.register( MSG_CS_ADD_RUN_DISTANCE, ( "distance:d", ) )
+packet.register( MSG_CS_PLAYER_STATE_BEATEN, ( "x:d", "z:d", "dir_x:d", "dir_z:d" ) )
 
 # =========== Server To Client ===================================
 packet.register( MSG_SC_LOGIN,          ( "status:i", "err:s" ) )
@@ -69,12 +86,19 @@ packet.register( MSG_SC_ENEMY_BEATEN,   ( "id:I", "x:d", "z:d" ) )
 packet.register( MSG_SC_OTHER_LOGIN,    ( "name:s", "x:d", "z:d", "hero:s", "weapon:H") )
 packet.register( MSG_SC_OTHER_LOGOUT,   ( "name:s", ) )
 packet.register( MSG_SC_OTHER_RUN,      ( "name:s", "x:d", "z:d", "dir_x:d", "dir_z:d", "velocity:d" ) )
-packet.register( MSG_SC_OTHER_STOP,     ( "name:s", "x:d", "z:d", "dir_x:d", "dir_z:d" ) )
+packet.register( MSG_SC_OTHER_STOP,     ( "name:s", "x:d", "z:d", "dir_x:d", "dir_z:d", "smooth:H" ) )
 packet.register( MSG_SC_OTHER_MAGIC,    ( "name:s", "magic:H" ) )
 packet.register( MSG_SC_OTHER_BULLET,   ( "name:s", "id:I", "x:d", "y:d", "z:d", "dir_x:d", "dir_z:d", "velocity:d", "tt:H" ) )
 packet.register( MSG_SC_OTHER_BULLET_END,  ( "id:I", ) )
 packet.register( MSG_SC_OTHER_CHANGE_WEAPON, ( "name:s", "weapon:H" ) )
+packet.register( MSG_SC_OTHER_BEATEN,   ( "name:s", "hp:d", "dir_x:d", "dir_z:d" ) )
 
 packet.register( MSG_SC_ITEM_BORN, ( "id:I", "tt:H", "x:d", "z:d" ) )
 packet.register( MSG_SC_ITEM_PICKED, ( "id:I", "uname:s", "tt:H" ) )
+
+packet.register( MSG_SC_CHAT, ( "name:s", "msg:s" ) )
+packet.register( MSG_SC_DEAD, ( "name:s", "dead:h") )
+packet.register( MSG_SC_ADD_RUN_DISTANCE, ( "name:s", "distance:d" ) )
+packet.register( MSG_SC_ADD_POINT, ( "name:s", "point:d" ) )
+packet.register( MSG_SC_OTHER_STATE_BEATEN, ( "name:s", "x:d", "z:d", "dir_x:d", "dir_z:d" ) )
 
